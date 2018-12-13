@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <title> Ann Arbor Parking Finder </title>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoU65Y6NdUoU1Lg49cwYjdHtUAqcm32fM"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script src="lodash.js"></script>
+  <script src="app.module.js"></script>
+</head>
+<style>
+  .garage{
+    width: 70vh;
+    padding: 5px;
+    margin: 5px;
+  }
+  .garage:hover{
+    box-shadow: 0 0 11px rgba(33,33,33,.2);
+    cursor: pointer;
+  }
+  .modalMap{
+    height: 500px;
+  }
+  .searchMap{
+    height: 500px;
+    width: 500px;
+  }
+  .garage-results{
+    height: 500px;
+    overflow-y: scroll;
+  }
+  ::-webkit-scrollbar { 
+    display: none; 
+  }
+</style>
+<body ng-app="annArborParking">
+    <div ng-controller="parkingResults">
+      <div class="container">
+        <div class ="row">
+          <h1 class="col-md-12" style="text-align: center;">ParkFinder</h1>
+        </div>
+        <div class="row" style="margin: 15px;"> 
+          <div class="col-xl">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Where are you?" ng-model="searchQuery" ng-keypress="checkKey()">
+              <div class="input-group-append">
+                <button class="btn btn-primary" ng-click="getResults()">Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+              <div id="searchMap" class="searchMap"></div>
+          </div>
+          <div id="garage-results" class="col-md-6 garage-results" style="float: left;">
+            <div class="row" ng-if="showResults" style="padding: 5px;">
+              <div class="col-md-6">
+                  <h5 class="mr-auto">Select a Garage</h5>
+              </div>
+              <div class="col-md-6">
+                <div class="btn-group" role="group" aria-label="Garage Filter" style="float:right;">
+                  <button type="button" class="btn btn-primary" ng-click="orderWith(0)">Availability</button>
+                  <button type="button" class="btn btn-primary" ng-click="orderWith(1)">Distance</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12" ng-repeat="garage in garages" ng-click="setSelectedGarage(garage)" ng-if="showResults" style="padding-left: 0px;">
+                <div class="card garage" data-toggle="modal" data-target="#directionsModal">
+                  <div class="card-header bg-info text-light font-weight-bold">
+                    <h5 class="card-title"><span style="float: left;">{{garage.name}}</span><span style="float: right;">{{garage.distance}}</span></h5>
+                  </div>
+                  <div class="card-body .bg-light">
+                    <h6 class="card-subtitle mb-2 text-muted">Availability: {{garage.availability}}</h6>
+                    <p class="card-text">Address: {{garage.address}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="directionsModal" tabindex="-1" role="dialog" aria-labelledby="directionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="directionsModalLabel">{{garages[selectedGarage].name}}</h5>
+            </div>
+            <div class="modal-body">
+              <div id="modalMap" class="modalMap"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="getDirections()">Get Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
